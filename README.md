@@ -49,6 +49,27 @@ Measured on the machine above, the wallpaper's canvas thread went from about
 820 ms of CPU per 10 s when visible to **0 ms** when covered. Windows that are
 large but not maximized don't pause it.
 
+## GPU driver: use nouveau, never NVIDIA's driver on Kepler
+
+This fork was developed and tested on a MacBook Pro 11,3, whose GeForce GT 750M
+is a **Kepler** GPU. If you have a Kepler NVIDIA GPU, **use the open-source
+nouveau driver and do not install NVIDIA's proprietary driver.**
+
+The only NVIDIA driver that still supports Kepler is the end-of-life
+470xx legacy branch, and on this hardware it's unworkable:
+
+- The test machine has always run nouveau, and this wallpaper runs smoothly on it
+  under Plasma 6 (Wayland) with kernel 7.3.
+- An identical MacBook Pro that ran the NVIDIA 470xx legacy driver became
+  unusable: KWin compositor corruption, plus other major problems.
+
+That matters especially for an animated wallpaper. It's drawn by `plasmashell`
+and composited by KWin every frame, so a broken compositor shows up right on
+your desktop. nouveau is in the mainline kernel and keeps working across kernel
+upgrades. If you're coming from the NVIDIA driver, remove it completely,
+including its packages and any `nouveau` blacklist in `/etc/modprobe.d/` or on
+the kernel command line.
+
 ## Features
 
 - Change font size
