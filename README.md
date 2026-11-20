@@ -8,7 +8,7 @@ Provides a Matrix-esque "code rainfall" background wallpaper for Plasma 6, with 
 This is a fork of [obsidianreq/matrixrain-plasma6](https://github.com/obsidianreq/matrixrain-plasma6)
 that cuts the wallpaper's CPU and GPU cost. See [Changes in this fork](#changes-in-this-fork).
 
-![screenshot.png](screenshot.png)
+![Matrix rain wallpaper in this fork, no glow](screenshot-no-glow.png)
 
 ## Changes in this fork
 
@@ -29,6 +29,11 @@ to 0. On a HiDPI panel that's a lot of pixels to blur several times a second,
 and the glow is barely visible at normal settings. The effect, the `Glow`
 setting and its config key are gone, and the Canvas now draws straight to the
 screen.
+
+The screenshot at the top is this fork, with no glow. For comparison, here's the
+original project's screenshot:
+
+![Original upstream screenshot](screenshot.png)
 
 ### Animation pauses while the desktop is covered
 
