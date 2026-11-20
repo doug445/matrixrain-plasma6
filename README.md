@@ -1,8 +1,48 @@
 # Matrix-style Wallpaper for KDE Plasma 6
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Free and open source](https://img.shields.io/badge/Free%20and%20open%20source-brightgreen.svg)](LICENSE)
+
 Provides a Matrix-esque "code rainfall" background wallpaper for Plasma 6, with some fun custommizations.
 
+This is a fork of [obsidianreq/matrixrain-plasma6](https://github.com/obsidianreq/matrixrain-plasma6)
+that cuts the wallpaper's CPU and GPU cost. See [Changes in this fork](#changes-in-this-fork).
+
 ![screenshot.png](screenshot.png)
+
+## Changes in this fork
+
+An animated wallpaper runs inside `plasmashell` all the time, so whatever it
+costs is paid continuously, even when you can't see it. On a MacBook Pro 11,3
+(Haswell i7 + GeForce GT 750M on nouveau) the original version kept a
+`plasmashell` canvas thread, the Qt render thread and the compositor busy
+around the clock. That load also ran into a separate post-suspend bug that left
+the CPU stuck at 800 MHz, which made it look like several `plasmashell` processes
+were pinned at 100%. Two changes fix the wallpaper's share of that.
+
+### Glow removed
+
+The glow was a `MultiEffect` shadow/blur pass layered over the whole screen.
+To make it work, the Canvas was hidden and rendered *through* the effect, so
+every frame went through an extra full-screen GPU pass even when glow was set
+to 0. On a HiDPI panel that's a lot of pixels to blur several times a second,
+and the glow is barely visible at normal settings. The effect, the `Glow`
+setting and its config key are gone, and the Canvas now draws straight to the
+screen.
+
+### Animation pauses while the desktop is covered
+
+The original paint timer always ran (`running: true`), redrawing the whole
+canvas even when a maximized window completely hid the wallpaper. The wallpaper
+now watches the window list (`TaskManager.TasksModel`, filtered to its own
+screen, the current virtual desktop and the current activity, ignoring
+minimized windows). While any maximized or fullscreen window is there, the
+timer stops. The last frame stays on screen and the rain picks up again as
+soon as the desktop is uncovered.
+
+Measured on the machine above, the wallpaper's canvas thread went from about
+820 ms of CPU per 10 s when visible to **0 ms** when covered. Windows that are
+large but not maximized don't pause it.
 
 ## Features
 
@@ -11,6 +51,7 @@ Provides a Matrix-esque "code rainfall" background wallpaper for Plasma 6, with 
 - Customize drop speed
 - Jitter effect
 - Glitch chance for a random bright white characters
+- Pauses automatically while a maximized or fullscreen window covers it
 
 ## Installation
 
@@ -19,7 +60,7 @@ package on arch based distros, `kpackagetool6` on Suse based distros, and
 `kf6-kpackage` on debian based distros.
 
 ```bash
-git clone https://github.com/obsidianreq/matrixrain-plasma6.git
+git clone https://github.com/doug445/matrixrain-plasma6.git
 cd matrixrain-plasma6
 kpackagetool6 --type Plasma/Wallpaper --install obsidianreq.plasma.wallpaper.matrixrain/
 kquitapp6 plasmashell && kstart plasmashell
