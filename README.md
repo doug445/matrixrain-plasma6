@@ -70,8 +70,9 @@ Then open system settings and there will be a new option under wallpapers.
 
 ## Reporting Bugs
 
-if you encounter any issues with the plugin, you can report them on the issue
-tracker using the following steps:
+if you encounter any issues with the plugin, you can report them on
+[this fork's issue tracker](https://github.com/doug445/matrixrain-plasma6/issues)
+using the following steps:
 
 - open a terminal and start journalctl with
   `journalctl -f | grep -i --line-buffered matrixrain` this will show logs
