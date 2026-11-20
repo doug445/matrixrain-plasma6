@@ -1,5 +1,6 @@
 import QtQuick 2.15
-import QtQuick.Effects
+import QtQuick.Window
+import org.kde.taskmanager 0.1 as TaskManager
 import org.kde.plasma.plasmoid 2.0
 
 WallpaperItem {
@@ -19,7 +20,6 @@ WallpaperItem {
     property int trailLengthMin: main.configuration.trailLengthMin !== undefined ? main.configuration.trailLengthMin : 5
     property int density:        main.configuration.density        !== undefined ? main.configuration.density        : 100
     property bool leadHighlight: main.configuration.leadHighlight  !== undefined ? main.configuration.leadHighlight  : false
-    property int glowSize:       main.configuration.glowSize       !== undefined ? main.configuration.glowSize       : 0
     property color bgColor:      main.configuration.bgColor        !== undefined ? main.configuration.bgColor        : "#000000"
     property int direction:      main.configuration.direction      !== undefined ? main.configuration.direction      : 0
     property bool varSpeed:      main.configuration.varSpeed       !== undefined ? main.configuration.varSpeed       : false
@@ -44,10 +44,51 @@ WallpaperItem {
         return s || "?"
     }
 
+    // ---- pause while covered ---------------------------------------------
+    // When a maximized or fullscreen window sits on this screen (current
+    // virtual desktop + activity, not minimized), nothing of the wallpaper is
+    // visible, so stop the paint timer entirely. The last frame stays on the
+    // canvas and animation resumes as soon as the desktop is uncovered.
+    property bool covered: false
+
+    TaskManager.ActivityInfo { id: activityInfo }
+
+    TaskManager.TasksModel {
+        id: tasksModel
+        groupMode: TaskManager.TasksModel.GroupDisabled
+        sortMode: TaskManager.TasksModel.SortDisabled
+        activity: activityInfo.currentActivity
+        screenGeometry: Qt.rect(Screen.virtualX, Screen.virtualY, Screen.width, Screen.height)
+        filterByActivity: true
+        filterByCurrentVirtualDesktop: true
+        filterByScreen: true
+        filterMinimized: true
+        filterHidden: true
+
+        onCountChanged:  main.updateCovered()
+        onDataChanged:   main.updateCovered()
+        onModelReset:    main.updateCovered()
+        onRowsInserted:  main.updateCovered()
+        onRowsRemoved:   main.updateCovered()
+    }
+
+    function updateCovered() {
+        var c = false
+        for (var i = 0; i < tasksModel.count; i++) {
+            var idx = tasksModel.index(i, 0)
+            if (tasksModel.data(idx, TaskManager.AbstractTasksModel.IsMinimized)) continue
+            if (tasksModel.data(idx, TaskManager.AbstractTasksModel.IsMaximized) ||
+                tasksModel.data(idx, TaskManager.AbstractTasksModel.IsFullScreen)) {
+                c = true
+                break
+            }
+        }
+        covered = c
+    }
+
+    Component.onCompleted: updateCovered()
+
     // Background is its own Rectangle so the Canvas can stay transparent.
-    // A transparent Canvas is required for the MultiEffect glow below: the
-    // shadow (halo) effect uses source alpha as a mask — if the Canvas were
-    // opaque-filled the whole screen would glow.
     Rectangle {
         id: bgRect
         anchors.fill: parent
@@ -58,9 +99,6 @@ WallpaperItem {
         id: canvas
         anchors.fill: parent
         renderStrategy: Canvas.Threaded
-        // Hidden because the MultiEffect below renders the canvas content
-        // (and adds the glow halo). The Canvas still paints to its texture.
-        visible: false
 
         // drops[col][dropIdx]              — float head position in rows
         // columnLastHeadRow[col][dropIdx]  — last integer row painted, -1 = not yet drawn
@@ -126,7 +164,7 @@ WallpaperItem {
         Timer {
             id: timer
             interval: 1000 / main.speed
-            running: true
+            running: !main.covered
             repeat: true
             onTriggered: canvas.requestPaint()
         }
@@ -166,8 +204,7 @@ WallpaperItem {
 
             // Fade by reducing destination alpha rather than painting opaque
             // bg: keeps the canvas transparent so the bg Rectangle shows
-            // through and so the MultiEffect glow has glyph-shaped alpha to
-            // work with.
+            // through.
             ctx.globalCompositeOperation = "destination-out"
             ctx.globalAlpha = fadeAlpha
             ctx.fillStyle = "#000"
@@ -295,23 +332,6 @@ WallpaperItem {
         onHeightChanged: initDrops()
     }
 
-    // GPU glow: renders the canvas plus a blurred halo behind sharp glyphs.
-    // shadowEnabled is the right MultiEffect mode for this (blur replaces the
-    // source with a blurred copy, which would smear the trails). With glow
-    // off, source is rendered through the effect unchanged.
-    MultiEffect {
-        anchors.fill: canvas
-        source: canvas
-        blurMax: 32
-        autoPaddingEnabled: true
-        shadowEnabled: main.glowSize > 0
-        shadowBlur: Math.min(1.0, main.glowSize / 30)
-        shadowOpacity: 1.0
-        shadowColor: main.colorMode === 0 ? main.singleColor : "#ffffff"
-        shadowHorizontalOffset: 0
-        shadowVerticalOffset: 0
-        shadowScale: 1.0
-    }
 
     onFontSizeChanged:       { canvas.initDrops(); canvas.requestPaint() }
     onSpeedChanged:          timer.interval = 1000 / main.speed
@@ -325,7 +345,6 @@ WallpaperItem {
     onTrailLengthChanged:    { canvas.initDrops(); canvas.requestPaint() }
     onTrailLengthMinChanged: { canvas.initDrops(); canvas.requestPaint() }
     onLeadHighlightChanged:  canvas.requestPaint()
-    onGlowSizeChanged:       canvas.requestPaint()
     onBgColorChanged:        canvas.requestPaint()
     onDirectionChanged:      { canvas.initDrops(); canvas.requestPaint() }
     onDensityChanged:        { canvas.initDrops(); canvas.requestPaint() }

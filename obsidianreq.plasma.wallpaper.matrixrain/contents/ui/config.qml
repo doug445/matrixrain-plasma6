@@ -18,7 +18,6 @@ KirigamiLayouts.FormLayout {
     property alias cfg_trailLengthMin:  trailMinSpin.value
     property alias cfg_density:         densitySpin.value
     property alias cfg_leadHighlight:   leadCheck.checked
-    property alias cfg_glowSize:        glowSpin.value
     property alias cfg_direction:       dirCombo.currentIndex
     property alias cfg_varSpeed:        varSpeedCheck.checked
     property alias cfg_dropsPerColumn:  dropsSpin.value
@@ -103,12 +102,6 @@ KirigamiLayouts.FormLayout {
         checked: configuration.leadHighlight !== undefined ? configuration.leadHighlight : false
         onCheckedChanged: configuration.leadHighlight = checked
         KirigamiLayouts.FormData.label: qsTr("Lead Highlight")
-    }
-    QC.SpinBox {
-        id: glowSpin; from: 0; to: 30; stepSize: 1
-        value: configuration.glowSize !== undefined ? configuration.glowSize : 0
-        onValueChanged: configuration.glowSize = value
-        KirigamiLayouts.FormData.label: qsTr("Glow")
     }
 
     // --- Motion ---
