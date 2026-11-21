@@ -18,7 +18,10 @@ if [[ ! -f "${PACKAGE_DIR}/metadata.json" ]]; then
     exit 1
 fi
 
-if kpackagetool6 --type "${PACKAGE_TYPE}" --list 2>/dev/null | grep -qx "${PACKAGE_ID}"; then
+# Capture the listing first: piping it into `grep -q` under pipefail can fail
+# with SIGPIPE when grep exits early, which would wrongly mean "not installed".
+installed="$(kpackagetool6 --type "${PACKAGE_TYPE}" --list 2>/dev/null || true)"
+if grep -qx "${PACKAGE_ID}" <<<"${installed}"; then
     echo "Package already installed; upgrading..."
     kpackagetool6 --type "${PACKAGE_TYPE}" --upgrade "${PACKAGE_DIR}"
 else
