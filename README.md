@@ -114,3 +114,10 @@ if the issue cannot be reproduced, you may still open an issue with a
 description of the issue and any relevant logs using
 `journalctl -b -0 | grep -i matrixrain`, this will show logs related to the
 plugin from the current boot.
+
+## Related projects
+
+Also made for the MacBook Pro 11,3 on Linux (nouveau, Plasma 6):
+
+- [mbp-resume-fix](https://github.com/doug445/mbp-resume-fix): fixes what closing and reopening the lid breaks, a CPU stuck at 800 MHz (BD_PROCHOT) and fans stuck at minimum, and installs upstream mbpfan 2.5.0.
+- [mbp113-kernel73-kit](https://github.com/doug445/mbp113-kernel73-kit): fixes what Linux 7.3 broke, quiet and tinny speakers (CS4208 pin regression) and fan control (applesmc hwmon move).
