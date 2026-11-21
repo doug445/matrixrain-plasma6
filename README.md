@@ -88,11 +88,13 @@ package on arch based distros, `kpackagetool6` on Suse based distros, and
 ```bash
 git clone https://github.com/doug445/matrixrain-plasma6.git
 cd matrixrain-plasma6
-kpackagetool6 --type Plasma/Wallpaper --install obsidianreq.plasma.wallpaper.matrixrain/
+./install.sh
 kquitapp6 plasmashell && kstart plasmashell
 ```
 
-Then open system settings and there will be a new option under wallpapers.
+`install.sh` installs the package, or upgrades it if an earlier version is
+already installed. Then open system settings and there will be a new option
+under wallpapers.
 
 ## Reporting Bugs
 
