@@ -2,7 +2,7 @@
   "KPlugin": {
     "Id": "obsidianreq.plasma.wallpaper.matrixrain",
     "Name": "Matrix Rain Wallpaper",
-    "Version": "1.5.0",
+    "Version": "1.5.1",
     "Category": "Wallpaper",
     "Description": "Matrix-style code waterfall wallpaper with multi-color, jitter, and fixed glitch chance",
     "Icon": "preferences-desktop-wallpaper",
