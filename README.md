@@ -70,6 +70,12 @@ upgrades. If you're coming from the NVIDIA driver, remove it completely,
 including its packages and any `nouveau` blacklist in `/etc/modprobe.d/` or on
 the kernel command line.
 
+The full technical report from the 470 machine is in
+[docs/NVIDIA-470-EOL-to-nouveau-Wayland-report.md](docs/NVIDIA-470-EOL-to-nouveau-Wayland-report.md).
+It covers all twelve problems from the 470 era (compositor corruption, no Wayland,
+boot fragility, clocks stuck at 405 MHz) and how moving to nouveau with Plasma 6
+Wayland resolved each one.
+
 ## Features
 
 - Change font size
